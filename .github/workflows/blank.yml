@@ -1,0 +1,40 @@
+#basic workflow for OPIUM
+
+name: Pull Request Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-review-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Create 'to-review' Branch
+        run: |
+          git checkout -b to-review
+          git push origin to-review
+
+  notify-for-review:
+    runs-on: ubuntu-latest
+    needs: create-review-branch
+    steps:
+      - name: Ping for Review
+        run: echo "@dominikstas there's a new push for review on branch 'to-review'"
+  merge-to-main:
+    runs-on: ubuntu-latest
+    needs: notify-for-review
+    steps:
+      - name: Checkout 'main' Branch
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Merge 'to-review' into 'main'
+        run: |
+          git merge --no-ff to-review
+          git push origin main
