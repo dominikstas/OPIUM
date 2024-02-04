@@ -18,8 +18,8 @@ jobs:
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-          echo "machine github.com login dominikstas password ${{ secrets.GH_TOKEN }}" > ~/.netrc
-          
+          git config credential.helper '!f() { echo "password=$GH_TOKEN"; }; f'
+
       - name: Create 'to-review' Branch
         run: |
           git checkout -b to-review
