@@ -1,5 +1,3 @@
-#basic workflow for OPIUM
-
 name: Pull Request Workflow
 
 on:
@@ -19,39 +17,37 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git config credential.helper '!f() { echo "password=$GH_TOKEN"; }; f'
-
       - name: Create 'to-review' Branch
         run: |
           git checkout -b to-review
           git push origin to-review
 
-
-  notify-for-review:
+  create-pull-request:
     runs-on: ubuntu-latest
     needs: create-review-branch
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Create Pull Request
+        run: |
+          gh pr create --base master --head to-review --title "Review Request" --body "Hey @dominikstas, there's a new push for review."
+
+  notify-for-review:
+    runs-on: ubuntu-latest
+    needs: create-pull-request
+    steps:
       - name: Notify for Review
-        run: echo "@dominikstas there's a new push for review " 
+        run: echo "Pull Request created for review. @dominikstas, please review it."
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: notify-for-review
     steps:
-      - name: Checkout 'master' Branch
-        uses: actions/checkout@v2
-        with:
-          ref: master
-
-      - name: Set up Git
+      - name: Merge 'to-review' into 'master'
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-
-      - name: Merge 'to-review' into 'master'
-        run: |
+          git checkout master
           git merge --no-ff to-review
           git push origin master
-
