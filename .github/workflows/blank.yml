@@ -5,7 +5,7 @@ name: Pull Request Workflow
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   create-review-branch:
